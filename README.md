@@ -5,7 +5,7 @@
 
 ## Quick Start (Standalone — no install needed)
 
-Open `index_standalone.html` directly in any modern browser.
+Open `index.html` directly in any modern browser.
 No server, no dependencies, fully self-contained.
 
 ---
