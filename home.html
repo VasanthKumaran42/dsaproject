@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vellore District — Shortest Path Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo-block">
+        <div class="logo-icon">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="18" cy="18" r="17" stroke="var(--accent)" stroke-width="2"/>
+            <circle cx="8"  cy="18" r="3.5" fill="var(--accent)"/>
+            <circle cx="28" cy="18" r="3.5" fill="var(--accent)"/>
+            <circle cx="18" cy="8"  r="3.5" fill="var(--accent2)"/>
+            <line x1="8"  y1="18" x2="18" y2="8"  stroke="var(--accent)"  stroke-width="1.5"/>
+            <line x1="18" y1="8"  x2="28" y2="18" stroke="var(--accent)"  stroke-width="1.5"/>
+            <line x1="8"  y1="18" x2="28" y2="18" stroke="var(--muted)"   stroke-width="1.5" stroke-dasharray="3 2"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="app-title">Vellore PathFinder</h1>
+          <p class="app-sub">Dijkstra's Shortest Path · Tamil Nadu</p>
+        </div>
+      </div>
+      <div class="header-badge">DSA Project</div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ MAIN LAYOUT ═══════════════ -->
+  <main class="app-main">
+
+    <!-- ── LEFT PANEL ── -->
+    <aside class="control-panel">
+
+      <!-- Source / Destination -->
+      <section class="card selector-card">
+        <h2 class="card-title">
+          <span class="pill">01</span> Select Locations
+        </h2>
+
+        <div class="field-group">
+          <label class="field-label" for="source">
+            <span class="dot dot-green"></span>Source
+          </label>
+          <div class="select-wrap">
+            <select id="source" class="styled-select">
+              <option value="">— Choose origin —</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="destination">
+            <span class="dot dot-red"></span>Destination
+          </label>
+          <div class="select-wrap">
+            <select id="destination" class="styled-select">
+              <option value="">— Choose destination —</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+
+        <button id="findBtn" class="find-btn" disabled>
+          <span class="btn-text">Find Shortest Path</span>
+          <span class="btn-icon">→</span>
+        </button>
+        <button id="resetBtn" class="reset-btn">↺ Reset</button>
+        <div id="inputError" class="error-msg hidden"></div>
+      </section>
+
+      <!-- Result Card -->
+      <section class="card result-card" id="resultCard">
+        <h2 class="card-title">
+          <span class="pill">02</span> Shortest Path
+        </h2>
+        <div id="resultContent" class="result-placeholder">
+          Run the algorithm to see results here.
+        </div>
+      </section>
+
+      <!-- Step-by-Step Panel -->
+      <section class="card steps-card" id="stepsCard">
+        <h2 class="card-title">
+          <span class="pill">03</span> Step-by-Step Traversal
+          <button id="toggleSteps" class="toggle-btn">Show</button>
+        </h2>
+        <div id="stepsContent" class="steps-list hidden"></div>
+      </section>
+
+      <!-- Legend -->
+      <section class="card legend-card">
+        <h2 class="card-title"><span class="pill">04</span> Legend</h2>
+        <ul class="legend-list">
+          <li><span class="leg-dot" style="background:var(--node-default)"></span>Unvisited node</li>
+          <li><span class="leg-dot" style="background:var(--node-visited)"></span>Visited by Dijkstra</li>
+          <li><span class="leg-dot" style="background:var(--node-path)"></span>Shortest path node</li>
+          <li><span class="leg-dot" style="background:var(--node-source)"></span>Source</li>
+          <li><span class="leg-dot" style="background:var(--node-dest)"></span>Destination</li>
+          <li><span class="leg-line" style="background:var(--edge-path)"></span>Shortest path edge</li>
+          <li><span class="leg-line" style="background:var(--edge-default)"></span>Regular road</li>
+        </ul>
+      </section>
+
+    </aside>
+
+    <!-- ── MAP CANVAS ── -->
+    <div class="map-wrapper">
+      <div class="map-toolbar">
+        <span class="map-label">Vellore District — Interactive Graph</span>
+        <div class="map-controls">
+          <button class="map-btn" id="zoomIn"  title="Zoom in">+</button>
+          <button class="map-btn" id="zoomOut" title="Zoom out">−</button>
+          <button class="map-btn" id="zoomReset" title="Reset zoom">⊙</button>
+        </div>
+      </div>
+
+      <div class="map-container" id="mapContainer">
+        <!-- Background map image -->
+        <img id="mapBg" src="map.jpg" alt="Vellore District Map"
+             class="map-bg" draggable="false" />
+
+        <!-- SVG graph overlay -->
+        <svg id="graphSvg" class="graph-svg" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrowPath" markerWidth="6" markerHeight="6"
+                    refX="5" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill="var(--edge-path)"/>
+            </marker>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="nodeShadow">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
+            </filter>
+          </defs>
+          <g id="edgeGroup"></g>
+          <g id="edgeLabelGroup"></g>
+          <g id="nodeGroup"></g>
+          <g id="nodeLabelGroup"></g>
+        </svg>
+      </div>
+
+      <!-- Loading overlay -->
+      <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="spinner"></div>
+        <span>Computing shortest path…</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════ SCRIPTS ═══════════════ -->
+  <!-- Inline graph + dijkstra data (same as server modules, for standalone fallback) -->
+  <script src="graph.js"></script>
+  <script src="dijkstra.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
